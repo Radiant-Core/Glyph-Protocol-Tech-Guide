@@ -1,11 +1,10 @@
 # Glyph-Protocol-Tech-Guide
-Guide on the Glyph Protocol 
 
 How the Glyphs Protocol works on Radiant RXD
 
-Introduction: 
 This is a guide to the Glyphs Protocol on the Radiant Blockchain.
 
+Introduction
 Glyphs is a token standard utilizing Radiant's induction proof system and advanced scripting capabilities. Each token is identified by a Radiant reference (ref) and uses smart contracts for enforcing token transfer rules. Glyphs is a fully layer one protocol with all rules enforced by miners.
 
 The Glyphs protocol operates efficiently with minimal indexing requirements, not requiring wallets or indexers to track each token transfer back to the mint. This allows wallets to efficiently verify tokens using SPV. This makes Glyphs a more secure, efficient and scalable system than layer two alternatives.
