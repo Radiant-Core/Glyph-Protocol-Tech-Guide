@@ -5,6 +5,7 @@ How the Glyphs Protocol works on Radiant RXD
 This is a guide to the Glyphs Protocol on the Radiant Blockchain.
 
 Introduction
+
 Glyphs is a token standard utilizing Radiant's induction proof system and advanced scripting capabilities. Each token is identified by a Radiant reference (ref) and uses smart contracts for enforcing token transfer rules. Glyphs is a fully layer one protocol with all rules enforced by miners.
 
 The Glyphs protocol operates efficiently with minimal indexing requirements, not requiring wallets or indexers to track each token transfer back to the mint. This allows wallets to efficiently verify tokens using SPV. This makes Glyphs a more secure, efficient and scalable system than layer two alternatives.
@@ -18,11 +19,13 @@ Glyphs is currently implemented in Photonic Wallet (Web App and Browser Extensio
 For support please join the Radiant community Discord server.
 
 Overview
+
 Glyphs are implemented using Radiant's UTXO model and operate in a similar way to native Radiant photons. Radiant photons are "colored" with a Radiant ref which acts like a contract identifier for the token. A token is minted by creating a UTXO containing an amount of photons, a standard token contract and a Radiant ref. The contract along with the ref is carried forward with each spend. The contract and ref remain the same for the lifetime of the token, until it is melted.
 
 With refs enforced by miners we can be certain a token is authentic simply by verifying block headers in the same way as native photons.
 
 Minting
+
 Glyphs are minted using a commit/reveal procedure with token metadata contained in the reveal transaction's unlocking script. The token's ref is created from an input to the reveal transaction. Therefore a glyph's ref will always point to a commit outpoint.
 
 The token payload in the reveal transaction contains data such as name, image, ticker, relationships to other tokens etc.
@@ -45,14 +48,17 @@ The reveal will be the transaction that spent this output, with a token payload 
 Radiant's implementation of ElectrumX has been improved to simplify the process of finding the reveal transaction.
 
 Transferring a token
+
 Transferring is done in much the same way as native Radiant photons. For NFTs, the UTXO is spent and the script is moved to a new output. Fungible tokens are similar, except since they use normal refs instead of singletons, token UTXOs may be split and merged.
 
 Any number of different tokens may be provided as inputs and outputs of a transaction. Token transfer rules are all implemented in script, with token input and output values summed within script, ensuring token supply is enforced. Token UTXOs may be positioned anywhere in a transaction's inputs and outputs and there is no restriction on the number of token UTXOs. The Radiant opcodes used to sum token values operate over any number of inputs and outputs.
 
 Encoding
+
 Acquiring and holding RXD coins is a fundamental way to support the Radiant ecosystem. Your participation in the coin and token economy helps drive growth and stability. More holders and Radiant ecosystem participants can strengthen the lindy effect. Here's why buying RXD matters:
 
 Payload structure
+
 A glyph's token data is encoded in the reveal unlocking script, identified by the string "gly" followed by a CBOR encoded token payload:
 
 OP_PUSH "gly"
