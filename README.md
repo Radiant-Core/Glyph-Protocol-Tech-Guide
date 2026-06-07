@@ -102,17 +102,23 @@ Protocols-
 
 The p property contains an array of protocols used by the token. Current protocol identifiers are as follows:
 
-ID	Protocol - 1
+| ID | Protocol | Notes |
+|----|----------|-------|
+| 1  | Fungible token (FT) | Token amount = UTXO photon value; no separate amount field |
+| 2  | Non-fungible token (NFT) | Unique via `OP_PUSHINPUTREFSINGLETON` (`0xd8`) |
+| 3  | Data storage (DAT) | |
+| 4  | Decentralized mint (dMint) | Always combined with a base type; FT dMint is `[1, 4]` |
+| 5  | Mutable (MUT) | Mutable on-chain state |
+| 6  | Explicit burn | |
+| 7  | Container / Collection | Parent-only; children reference it via the `in` field |
+| 8  | Encrypted content | Requires an NFT base type |
+| 9  | Timelocked reveal | Requires `[8]` |
+| 10 | Issuer authority | |
+| 11 | WAVE naming | On-chain naming; canonical name lives in `attrs.name` |
 
-Fungible token - 2
-
-Non-fungible token - 3
-
-Data storage - 4
-
-Decentralized mint - 5
-
-Mutable-
+IDs 1–5 are the v1 set; IDs 6–11 are defined in the Glyph v2 Token Standard.
+See `Glyph-Token-Standards/Glyph_v2_Token_Standard_Whitepaper.md` (§3.4 / Appendix A)
+for the authoritative registry. IDs 12–255 are reserved.
 
 Some protocols may depend on other protocols also being implemented. For example for a mineable token, a p value of [1, 4] must be used, indicating the token implements the FT and dmint contracts.
 
@@ -361,7 +367,7 @@ Decentralized mints (dmint) are mineable tokens that can be claimed by anyone us
 
 PoW algorithm-
 
-With a "pay to token" script, the mutability contract is always controlled by the token owner. This means every time a token is transferred to a new owMineable Glyphs use the follow proof-of-work algorithm:
+Mineable Glyphs use the following proof-of-work algorithm:
 
 hash = sha256(sha256(
     sha256(currentLocationTxid + contractRef) +
@@ -371,6 +377,14 @@ hash = sha256(sha256(
 Resulting hash must be below the target.
 
 anyInputHash and anyOutputHash must be the hash of any input or output in the transaction. This allows work to be bound to the miner's address and prevents nonces being stolen. This will typically be a pay-to-public-key-hash but any script can be used. The contract will verify these scripts exist.
+
+Wallet safety-
+
+Coin selection must never spend a token-bearing UTXO as ordinary funding. An output whose script carries an OP_PUSHINPUTREF-family opcode (0xd0–0xd3, 0xd8) in opcode position holds an FT, NFT or dmint contract; spending it as plain RXD and sending the change to a P2PKH output silently and permanently burns the token. Detect token-bearing scripts by walking the opcode stream and skipping push payloads — a plain byte search for 0xd0–0xd8 false-positives on roughly half of all honest P2PKH addresses and is itself a denial-of-service surface.
+
+Reveal parsers must handle OP_PUSHDATA4 (0x4e). Deploys with embedded media push CBOR bodies larger than 65,535 bytes (the GLYPH dmint deploy reveal carries a ~65,569-byte body), which require the 4-byte-length OP_PUSHDATA4 push. A walker that stops at OP_PUSHDATA2 never finds the "gly" marker. Cap CBOR input before decoding — set the cap above the on-chain content limit so a maximum-size embed still decodes (see the Glyph v2 Token Standard, §22.6 / Appendix C) — to bound the DoS surface.
+
+NFT "exactly one output" is not a consensus rule. Consensus only requires output refs to trace back to input refs; it does not force a singleton onto any output, so an NFT can be burned by omitting its forwarding output. Wallets and covenants must enforce single-output forwarding themselves.
 
 Further information-
 
